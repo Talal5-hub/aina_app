@@ -1,0 +1,84 @@
+name: aina
+description: Pakistan's premium salon discovery and booking platform.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+
+  # Routing
+  go_router: ^14.2.0
+
+  # Code Generation Support (models use these starting Phase 4+)
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+  equatable: ^2.0.5
+
+  # UI / UX
+  google_fonts: ^6.2.1
+  cached_network_image: ^3.3.1
+  flutter_svg: ^2.0.10+1
+  flutter_animate: ^4.5.0
+  lottie: ^3.1.2
+  shimmer: ^3.0.0
+  flutter_hooks: ^0.20.5
+  hooks_riverpod: ^2.5.1
+  flutter_localizations:
+    sdk: flutter
+
+  # Backend
+  supabase_flutter: ^2.5.6
+
+  # Networking
+  dio: ^5.4.3+1
+  connectivity_plus: ^6.0.3
+
+  # Device / Permissions
+  permission_handler: ^11.3.1
+  image_picker: ^1.1.2
+  geolocator: ^12.0.0
+  google_maps_flutter: ^2.7.0
+  url_launcher: ^6.3.0
+
+  # Local Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.2.3
+  flutter_secure_storage: ^9.2.2
+
+  # Utilities
+  intl: ^0.20.2
+  logger: ^2.3.0
+  uuid: ^4.4.0
+  collection: ^1.18.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # Code Generation
+  build_runner: ^2.4.11
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+
+  # Testing
+  mocktail: ^1.0.4
+  golden_toolkit: ^0.15.0
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/lottie/
+    - assets/translations/

@@ -1,0 +1,87 @@
+{
+  "appName": "آئینہ",
+  "common": {
+    "retry": "دوبارہ کوشش کریں",
+    "cancel": "منسوخ کریں",
+    "confirm": "تصدیق کریں",
+    "save": "محفوظ کریں",
+    "done": "مکمل",
+    "loading": "لوڈ ہو رہا ہے...",
+    "seeAll": "سب دیکھیں",
+    "search": "تلاش کریں",
+    "filter": "فلٹر",
+    "noInternet": "انٹرنیٹ کنکشن نہیں ہے",
+    "somethingWentWrong": "کچھ غلط ہو گیا"
+  },
+  "auth": {
+    "login": "لاگ ان کریں",
+    "signup": "سائن اپ کریں",
+    "email": "ای میل",
+    "password": "پاس ورڈ",
+    "forgotPassword": "پاس ورڈ بھول گئے؟",
+    "continueWithGoogle": "گوگل کے ساتھ جاری رکھیں",
+    "continueWithApple": "ایپل کے ساتھ جاری رکھیں",
+    "dontHaveAccount": "اکاؤنٹ نہیں ہے؟",
+    "alreadyHaveAccount": "پہلے سے اکاؤنٹ ہے؟"
+  },
+  "home": {
+    "greeting": "ہیلو، {name}",
+    "nearbyYou": "آپ کے قریب",
+    "featured": "نمایاں",
+    "popular": "مقبول",
+    "topRated": "اعلیٰ درجہ بندی",
+    "offers": "پیشکشیں",
+    "recentlyViewed": "حال ہی میں دیکھا گیا"
+  },
+  "salon": {
+    "openNow": "ابھی کھلا ہے",
+    "closed": "بند ہے",
+    "verified": "تصدیق شدہ",
+    "services": "خدمات",
+    "reviews": "جائزے",
+    "facilities": "سہولیات",
+    "gallery": "گیلری",
+    "getDirections": "راستہ حاصل کریں",
+    "call": "کال کریں",
+    "whatsapp": "واٹس ایپ",
+    "addToFavorites": "پسندیدہ میں شامل کریں",
+    "removeFromFavorites": "پسندیدہ سے ہٹائیں"
+  },
+  "search": {
+    "hint": "سیلون، خدمات، علاقے تلاش کریں...",
+    "noResults": "کوئی نتیجہ نہیں ملا",
+    "filters": {
+      "openNow": "ابھی کھلا ہے",
+      "distance": "فاصلہ",
+      "rating": "درجہ بندی",
+      "priceRange": "قیمت کی حد",
+      "parking": "پارکنگ",
+      "wifi": "وائی فائی",
+      "ac": "ایئر کنڈیشننگ",
+      "wheelchair": "ویل چیئر رسائی"
+    }
+  },
+  "favorites": {
+    "title": "پسندیدہ",
+    "empty": "آپ نے ابھی تک کوئی سیلون محفوظ نہیں کیا"
+  },
+  "profile": {
+    "title": "پروفائل",
+    "editProfile": "پروفائل میں ترمیم کریں",
+    "myFavorites": "میری پسندیدہ",
+    "settings": "ترتیبات",
+    "logout": "لاگ آؤٹ",
+    "deleteAccount": "اکاؤنٹ حذف کریں"
+  },
+  "settings": {
+    "title": "ترتیبات",
+    "theme": "تھیم",
+    "language": "زبان",
+    "darkMode": "ڈارک موڈ",
+    "notifications": "اطلاعات",
+    "about": "کے بارے میں",
+    "rateApp": "ایپ کی درجہ بندی کریں",
+    "shareApp": "ایپ شیئر کریں",
+    "termsAndPrivacy": "شرائط اور رازداری"
+  }
+}

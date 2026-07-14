@@ -1,0 +1,9 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M256 140 L356 372 L308 372 L286 318 L226 318 L204 372 L156 372 L256 140 Z
+       M256 214 L234 270 L278 270 L256 214 Z"
+    fill="#000000"
+    fill-rule="evenodd"
+  />
+  <circle cx="256" cy="112" r="14" fill="#000000"/>
+</svg>

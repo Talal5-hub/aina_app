@@ -1,0 +1,87 @@
+{
+  "appName": "Aina",
+  "common": {
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "done": "Done",
+    "loading": "Loading...",
+    "seeAll": "See all",
+    "search": "Search",
+    "filter": "Filter",
+    "noInternet": "No internet connection",
+    "somethingWentWrong": "Something went wrong"
+  },
+  "auth": {
+    "login": "Log In",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithApple": "Continue with Apple",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "home": {
+    "greeting": "Hi, {name}",
+    "nearbyYou": "Nearby you",
+    "featured": "Featured",
+    "popular": "Popular",
+    "topRated": "Top rated",
+    "offers": "Offers",
+    "recentlyViewed": "Recently viewed"
+  },
+  "salon": {
+    "openNow": "Open now",
+    "closed": "Closed",
+    "verified": "Verified",
+    "services": "Services",
+    "reviews": "Reviews",
+    "facilities": "Facilities",
+    "gallery": "Gallery",
+    "getDirections": "Get Directions",
+    "call": "Call",
+    "whatsapp": "WhatsApp",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites"
+  },
+  "search": {
+    "hint": "Search salons, services, areas...",
+    "noResults": "No results found",
+    "filters": {
+      "openNow": "Open Now",
+      "distance": "Distance",
+      "rating": "Rating",
+      "priceRange": "Price Range",
+      "parking": "Parking",
+      "wifi": "WiFi",
+      "ac": "Air Conditioning",
+      "wheelchair": "Wheelchair Access"
+    }
+  },
+  "favorites": {
+    "title": "Favorites",
+    "empty": "You haven't saved any salons yet"
+  },
+  "profile": {
+    "title": "Profile",
+    "editProfile": "Edit Profile",
+    "myFavorites": "My Favorites",
+    "settings": "Settings",
+    "logout": "Log Out",
+    "deleteAccount": "Delete Account"
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "language": "Language",
+    "darkMode": "Dark Mode",
+    "notifications": "Notifications",
+    "about": "About",
+    "rateApp": "Rate App",
+    "shareApp": "Share App",
+    "termsAndPrivacy": "Terms & Privacy"
+  }
+}
