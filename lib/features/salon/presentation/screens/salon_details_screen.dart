@@ -69,6 +69,7 @@ class _SalonDetailsContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final servicesAsync = ref.watch(salonServicesProvider(salon.id));
+    final isOwnerAccount = ref.watch(myProfileProvider).valueOrNull?.isOwner ?? false;
 
     return CustomScrollView(
       slivers: [
@@ -78,10 +79,14 @@ class _SalonDetailsContent extends ConsumerWidget {
           backgroundColor: AppColors.secondary,
           iconTheme: const IconThemeData(color: Colors.white),
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: FavoriteButton(salonId: salon.id, size: 22),
-            ),
+            // Favoriting is a customer action - a business-owner account
+            // browsing salons is here to claim its own listing, not to
+            // shop, so this doesn't apply to it.
+            if (!isOwnerAccount)
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: FavoriteButton(salonId: salon.id, size: 22),
+              ),
           ],
           flexibleSpace: FlexibleSpaceBar(
             background: SalonCoverImage(
@@ -217,6 +222,7 @@ class _SalonDetailsContent extends ConsumerWidget {
               itemBuilder: (context, index) => _ServiceRow(
                 salon: salon,
                 service: services[index],
+                isOwnerAccount: isOwnerAccount,
               ),
             ),
           ),
@@ -258,17 +264,22 @@ class _SalonDetailsContent extends ConsumerWidget {
 class _ServiceRow extends StatelessWidget {
   final Salon salon;
   final Service service;
+  final bool isOwnerAccount;
 
-  const _ServiceRow({required this.salon, required this.service});
+  const _ServiceRow({required this.salon, required this.service, required this.isOwnerAccount});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => context.pushNamed(
-        RouteNames.booking,
-        pathParameters: {'salonId': salon.id, 'serviceId': service.id},
-        extra: BookingScreenArgs(service: service, salonName: salon.name),
-      ),
+      // Booking is a customer action - an owner account browsing here
+      // is looking for its own listing to claim, not to book a service.
+      onTap: isOwnerAccount
+          ? null
+          : () => context.pushNamed(
+                RouteNames.booking,
+                pathParameters: {'salonId': salon.id, 'serviceId': service.id},
+                extra: BookingScreenArgs(service: service, salonName: salon.name),
+              ),
       borderRadius: BorderRadius.circular(8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,7 +322,8 @@ class _ServiceRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Icon(Icons.chevron_right, size: 18, color: context.textSecondary),
+              if (!isOwnerAccount)
+                Icon(Icons.chevron_right, size: 18, color: context.textSecondary),
             ],
           ),
         ],

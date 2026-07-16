@@ -18,6 +18,7 @@ import 'package:aina/features/salon/presentation/screens/salon_details_screen.da
 import 'package:aina/features/booking/presentation/screens/booking_screen.dart';
 import 'package:aina/features/booking/presentation/screens/my_bookings_screen.dart';
 import 'package:aina/features/favorites/presentation/screens/favorites_screen.dart';
+import 'package:aina/features/owner/presentation/screens/claim_salon_screen.dart';
 import 'package:aina/features/owner/presentation/screens/my_business_screen.dart';
 import 'package:aina/features/owner/presentation/screens/salon_management_screen.dart';
 import 'package:aina/features/profile/presentation/screens/profile_screen.dart';
@@ -164,6 +165,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: RouteNames.myBusinessPath,
         name: RouteNames.myBusiness,
         builder: (context, state) => const MyBusinessScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.claimSalonPath,
+        name: RouteNames.claimSalon,
+        builder: (context, state) => const ClaimSalonScreen(),
       ),
       GoRoute(
         path: RouteNames.salonManagementPath,

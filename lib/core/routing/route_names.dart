@@ -71,4 +71,6 @@ class RouteNames {
   static const String myBusinessPath = '/my-business';
   static const String salonManagement = 'salonManagement';
   static const String salonManagementPath = '/my-business/:salonId';
+  static const String claimSalon = 'claimSalon';
+  static const String claimSalonPath = '/find-my-salon';
 }

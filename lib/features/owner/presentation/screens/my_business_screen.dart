@@ -38,7 +38,7 @@ class MyBusinessScreen extends ConsumerWidget {
       body: ownedSalonsAsync.when(
         data: (salons) {
           if (salons.isEmpty) {
-            return _EmptyState(onBrowse: () => context.goNamed(RouteNames.home));
+            return _EmptyState(onBrowse: () => context.pushNamed(RouteNames.claimSalon));
           }
           return RefreshIndicator(
             color: AppColors.primary,
