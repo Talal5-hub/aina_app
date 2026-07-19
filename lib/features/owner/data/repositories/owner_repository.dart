@@ -1,3 +1,4 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:aina/core/services/supabase_service.dart';
 import 'package:aina/features/booking/data/models/booking.dart';
 import 'package:aina/features/owner/data/models/owner_booking.dart';
@@ -31,6 +32,74 @@ class OwnerRepository {
     return (response as List)
         .map((row) => Salon.fromJson(row as Map<String, dynamic>))
         .toList();
+  }
+
+  // ---------- Registering a brand-new salon ----------
+
+  /// Creates a brand-new salon (as opposed to claiming an existing
+  /// Google-Maps-imported listing) via the `create_owner_salon`
+  /// function. That function enforces server-side that a second+ salon
+  /// must share the exact name of one the caller already owns, and a
+  /// database-level unique index on `lower(name)` rejects the name
+  /// outright if it's already taken by anyone else - that index is the
+  /// real anti-squatting protection, not this call itself.
+  ///
+  /// Throws a [PostgrestException] with a human-readable message on
+  /// name conflicts or the "must match existing name" rule.
+  Future<void> createOwnerSalon({
+    required String name,
+    required String address,
+    required String city,
+    String? area,
+    String? phone,
+    String? description,
+  }) async {
+    await SupabaseService.client.rpc('create_owner_salon', params: {
+      'p_name': name,
+      'p_address': address,
+      'p_city': city,
+      'p_area': area,
+      'p_phone': phone,
+      'p_description': description,
+    });
+  }
+
+  // ---------- Ownership verification (for a 2nd+ salon) ----------
+
+  /// Sends a 6-digit one-time code to the signed-in owner's own account
+  /// email via Supabase's built-in email-OTP flow - no separate email
+  /// provider needed. `shouldCreateUser: false` guards against ever
+  /// creating a duplicate account; this is purely a re-verification of
+  /// an existing session.
+  ///
+  /// Worth being clear about what this does and doesn't prove: it
+  /// confirms the caller controls their own login email, which is a
+  /// reasonable "are you sure / prove it's really you" step before
+  /// registering another location. It does NOT independently verify
+  /// that they're the legitimate owner of an existing real-world brand
+  /// if that name belongs to someone else's account - the database's
+  /// unique name index is what actually blocks that.
+  Future<void> sendOwnershipVerificationOtp() async {
+    final email = SupabaseService.currentUser!.email;
+    if (email == null) {
+      throw Exception('Your account has no email on file to verify.');
+    }
+    await SupabaseService.auth.signInWithOtp(email: email, shouldCreateUser: false);
+  }
+
+  /// Verifies the code from [sendOwnershipVerificationOtp]. Throws if
+  /// the code is wrong or expired - Supabase's own server checks this,
+  /// so it can't be bypassed by a modified client skipping the call.
+  Future<void> verifyOwnershipOtp(String code) async {
+    final email = SupabaseService.currentUser!.email;
+    if (email == null) {
+      throw Exception('Your account has no email on file to verify.');
+    }
+    await SupabaseService.auth.verifyOTP(
+      email: email,
+      token: code,
+      type: OtpType.email,
+    );
   }
 
   // ---------- Bookings ----------
@@ -138,12 +207,24 @@ class OwnerRepository {
 
   // ---------- Salon info ----------
 
+  /// Updates any subset of a salon's info fields. Renaming to a name
+  /// that's already taken (by anyone) will throw a unique-violation
+  /// [PostgrestException] via the database's name-protection index -
+  /// callers should catch that and show a friendly message.
   Future<Salon> updateSalonInfo({
     required String salonId,
+    String? name,
+    String? address,
+    String? city,
+    String? area,
     String? description,
     String? phone,
   }) async {
     final updates = <String, dynamic>{};
+    if (name != null) updates['name'] = name;
+    if (address != null) updates['address'] = address;
+    if (city != null) updates['city'] = city;
+    if (area != null) updates['area'] = area;
     if (description != null) updates['description'] = description;
     if (phone != null) updates['phone'] = phone;
 

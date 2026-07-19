@@ -69,7 +69,6 @@ class _SalonDetailsContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final servicesAsync = ref.watch(salonServicesProvider(salon.id));
-    final isOwnerAccount = ref.watch(myProfileProvider).valueOrNull?.isOwner ?? false;
 
     return CustomScrollView(
       slivers: [
@@ -79,14 +78,10 @@ class _SalonDetailsContent extends ConsumerWidget {
           backgroundColor: AppColors.secondary,
           iconTheme: const IconThemeData(color: Colors.white),
           actions: [
-            // Favoriting is a customer action - a business-owner account
-            // browsing salons is here to claim its own listing, not to
-            // shop, so this doesn't apply to it.
-            if (!isOwnerAccount)
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: FavoriteButton(salonId: salon.id, size: 22),
-              ),
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: FavoriteButton(salonId: salon.id, size: 22),
+            ),
           ],
           flexibleSpace: FlexibleSpaceBar(
             background: SalonCoverImage(
@@ -222,7 +217,6 @@ class _SalonDetailsContent extends ConsumerWidget {
               itemBuilder: (context, index) => _ServiceRow(
                 salon: salon,
                 service: services[index],
-                isOwnerAccount: isOwnerAccount,
               ),
             ),
           ),
@@ -264,22 +258,17 @@ class _SalonDetailsContent extends ConsumerWidget {
 class _ServiceRow extends StatelessWidget {
   final Salon salon;
   final Service service;
-  final bool isOwnerAccount;
 
-  const _ServiceRow({required this.salon, required this.service, required this.isOwnerAccount});
+  const _ServiceRow({required this.salon, required this.service});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      // Booking is a customer action - an owner account browsing here
-      // is looking for its own listing to claim, not to book a service.
-      onTap: isOwnerAccount
-          ? null
-          : () => context.pushNamed(
-                RouteNames.booking,
-                pathParameters: {'salonId': salon.id, 'serviceId': service.id},
-                extra: BookingScreenArgs(service: service, salonName: salon.name),
-              ),
+      onTap: () => context.pushNamed(
+        RouteNames.booking,
+        pathParameters: {'salonId': salon.id, 'serviceId': service.id},
+        extra: BookingScreenArgs(service: service, salonName: salon.name),
+      ),
       borderRadius: BorderRadius.circular(8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,8 +311,7 @@ class _ServiceRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              if (!isOwnerAccount)
-                Icon(Icons.chevron_right, size: 18, color: context.textSecondary),
+              Icon(Icons.chevron_right, size: 18, color: context.textSecondary),
             ],
           ),
         ],
@@ -380,6 +368,9 @@ class _ClaimBannerState extends ConsumerState<_ClaimBanner> {
       if (!mounted) return;
       ref.invalidate(salonDetailsProvider(widget.salon.id));
       ref.invalidate(myOwnedSalonsProvider);
+      // The server just auto-switched active_view to 'business' - pick
+      // that up now rather than waiting for the next app launch.
+      ref.invalidate(myProfileProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("You're now the owner of this listing.")),
       );
@@ -397,8 +388,6 @@ class _ClaimBannerState extends ConsumerState<_ClaimBanner> {
 
   @override
   Widget build(BuildContext context) {
-    final isOwnerAccount = ref.watch(myProfileProvider).valueOrNull?.isOwner ?? false;
-
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -419,23 +408,22 @@ class _ClaimBannerState extends ConsumerState<_ClaimBanner> {
                   style: TextStyle(fontWeight: FontWeight.w600, color: context.textPrimary, fontSize: 13),
                 ),
                 Text(
-                  isOwnerAccount ? 'Is this your salon?' : 'Not yet claimed by its owner.',
+                  'Is this your salon?',
                   style: TextStyle(color: context.textSecondary, fontSize: 12.5),
                 ),
               ],
             ),
           ),
-          if (isOwnerAccount)
-            TextButton(
-              onPressed: _isClaiming ? null : _confirmClaim,
-              child: _isClaiming
-                  ? const SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Claim it'),
-            ),
+          TextButton(
+            onPressed: _isClaiming ? null : _confirmClaim,
+            child: _isClaiming
+                ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Claim it'),
+          ),
         ],
       ),
     );

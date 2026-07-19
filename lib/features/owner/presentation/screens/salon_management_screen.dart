@@ -5,6 +5,7 @@ import 'package:aina/core/theme/app_colors.dart';
 import 'package:aina/core/theme/theme_extensions.dart';
 import 'package:aina/features/booking/data/models/booking.dart';
 import 'package:aina/features/owner/data/models/owner_booking.dart';
+import 'package:aina/features/owner/presentation/widgets/salon_info_form_dialog.dart';
 import 'package:aina/features/owner/presentation/widgets/service_form_dialog.dart';
 import 'package:aina/features/owner/providers/owner_providers.dart';
 import 'package:aina/features/salon/data/models/service.dart';
@@ -14,6 +15,36 @@ class SalonManagementScreen extends ConsumerWidget {
   const SalonManagementScreen({super.key, required this.salonId});
 
   final String salonId;
+
+  Future<void> _editSalonInfo(BuildContext context, WidgetRef ref) async {
+    final salon = ref.read(salonDetailsProvider(salonId)).valueOrNull;
+    if (salon == null) return;
+
+    final result = await showSalonInfoFormDialog(context, salon: salon);
+    if (result == null) return;
+
+    try {
+      await ref.read(ownerRepositoryProvider).updateSalonInfo(
+            salonId: salonId,
+            name: result.name,
+            address: result.address,
+            city: result.city,
+            area: result.area,
+            phone: result.phone,
+            description: result.description,
+          );
+      ref.invalidate(salonDetailsProvider(salonId));
+      ref.invalidate(myOwnedSalonsProvider);
+    } catch (e) {
+      if (!context.mounted) return;
+      final message = e.toString().contains('duplicate key') || e.toString().contains('unique')
+          ? 'A salon with this name already exists. Please choose a different name.'
+          : "Couldn't update salon info. Please try again.";
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: AppColors.error),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,6 +61,13 @@ class SalonManagementScreen extends ConsumerWidget {
             salonAsync.valueOrNull?.name ?? 'Manage salon',
             style: TextStyle(color: context.textPrimary, fontWeight: FontWeight.bold),
           ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.edit_outlined, color: context.textSecondary),
+              tooltip: 'Edit salon info',
+              onPressed: () => _editSalonInfo(context, ref),
+            ),
+          ],
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Bookings'),

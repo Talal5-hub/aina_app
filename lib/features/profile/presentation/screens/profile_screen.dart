@@ -5,6 +5,7 @@ import 'package:aina/core/routing/route_names.dart';
 import 'package:aina/core/services/supabase_service.dart';
 import 'package:aina/core/theme/app_colors.dart';
 import 'package:aina/core/theme/theme_extensions.dart';
+import 'package:aina/core/view_mode/active_view_provider.dart';
 import 'package:aina/features/auth/providers/auth_providers.dart';
 import 'package:aina/features/profile/data/models/profile.dart';
 import 'package:aina/features/profile/providers/profile_providers.dart';
@@ -88,26 +89,51 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
   Future<void> _editProfile() async {
     final nameController = TextEditingController(text: widget.profile.fullName ?? '');
     final phoneController = TextEditingController(text: widget.profile.phone ?? '');
+    final formKey = GlobalKey<FormState>();
 
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Edit profile'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Full name'),
-              textCapitalization: TextCapitalization.words,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: phoneController,
-              decoration: const InputDecoration(labelText: 'Phone'),
-              keyboardType: TextInputType.phone,
-            ),
-          ],
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Full name'),
+                textCapitalization: TextCapitalization.words,
+                // Defense-in-depth only — the server's validate_profile_row
+                // trigger is the actual, non-bypassable check.
+                validator: (value) {
+                  final trimmed = value?.trim() ?? '';
+                  if (trimmed.isEmpty) return null; // optional field
+                  if (trimmed.length > 100) return 'Name is too long';
+                  if (!RegExp(r"^[a-zA-Z\s.'-]+$").hasMatch(trimmed)) {
+                    return 'Name contains invalid characters';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: phoneController,
+                decoration: const InputDecoration(labelText: 'Phone'),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  final trimmed = value?.trim() ?? '';
+                  if (trimmed.isEmpty) return null; // optional field
+                  final digitCount = trimmed.replaceAll(RegExp(r'[^0-9]'), '').length;
+                  if (digitCount < 7 || digitCount > 15) return 'Enter a valid phone number';
+                  if (!RegExp(r'^[0-9+()\-\s]+$').hasMatch(trimmed)) {
+                    return 'Phone contains invalid characters';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -115,7 +141,10 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () {
+              if (!formKey.currentState!.validate()) return;
+              Navigator.of(context).pop(true);
+            },
             child: const Text('Save'),
           ),
         ],
@@ -225,31 +254,28 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
           ),
         ),
         const SizedBox(height: 24),
-        if (!widget.profile.isOwner) ...[
-          _MenuTile(
-            icon: Icons.calendar_today_outlined,
-            label: 'My Bookings',
-            onTap: () => context.pushNamed(RouteNames.myBookings),
-          ),
-          _MenuTile(
-            icon: Icons.favorite_border,
-            label: 'Favorites',
-            onTap: () => context.pushNamed(RouteNames.favorites),
-          ),
-        ],
+        _ViewSwitcher(),
+        const SizedBox(height: 16),
+        _MenuTile(
+          icon: Icons.calendar_today_outlined,
+          label: 'My Bookings',
+          onTap: () => context.pushNamed(RouteNames.myBookings),
+        ),
+        _MenuTile(
+          icon: Icons.favorite_border,
+          label: 'Favorites',
+          onTap: () => context.pushNamed(RouteNames.favorites),
+        ),
+        _MenuTile(
+          icon: Icons.storefront_outlined,
+          label: 'My Business',
+          onTap: () => context.pushNamed(RouteNames.myBusiness),
+        ),
         _MenuTile(
           icon: Icons.settings_outlined,
           label: 'Settings',
           onTap: () => context.pushNamed(RouteNames.settings),
         ),
-        if (widget.profile.isOwner) ...[
-          const SizedBox(height: 12),
-          _MenuTile(
-            icon: Icons.storefront_outlined,
-            label: 'My Business',
-            onTap: () => context.pushNamed(RouteNames.myBusiness),
-          ),
-        ],
         const SizedBox(height: 12),
         _MenuTile(
           icon: Icons.logout,
@@ -259,6 +285,97 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
           onTap: _isSigningOut ? null : _confirmSignOut,
         ),
       ],
+    );
+  }
+}
+
+/// Lets the person flip between the Customer and Business experiences
+/// at any time - see ActiveViewNotifier. Switching navigates back to
+/// `/home`, where RoleGate re-evaluates and shows the matching screen.
+class _ViewSwitcher extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // valueOrNull: while the initial fetch is in flight, neither option
+    // shows as selected rather than blocking on a spinner here - a
+    // tap still works immediately once resolved.
+    final activeView = ref.watch(activeViewProvider).valueOrNull;
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.outlineColor),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _ViewSwitcherOption(
+              label: 'Customer',
+              icon: Icons.person_outline,
+              isSelected: activeView == ActiveView.customer,
+              onTap: () {
+                ref.read(activeViewProvider.notifier).setView(ActiveView.customer);
+                context.goNamed(RouteNames.home);
+              },
+            ),
+          ),
+          Expanded(
+            child: _ViewSwitcherOption(
+              label: 'Business',
+              icon: Icons.storefront_outlined,
+              isSelected: activeView == ActiveView.business,
+              onTap: () {
+                ref.read(activeViewProvider.notifier).setView(ActiveView.business);
+                context.goNamed(RouteNames.home);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ViewSwitcherOption extends StatelessWidget {
+  const _ViewSwitcherOption({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 18, color: isSelected ? AppColors.secondary : context.textSecondary),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? AppColors.secondary : context.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

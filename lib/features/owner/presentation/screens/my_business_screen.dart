@@ -38,16 +38,39 @@ class MyBusinessScreen extends ConsumerWidget {
       body: ownedSalonsAsync.when(
         data: (salons) {
           if (salons.isEmpty) {
-            return _EmptyState(onBrowse: () => context.pushNamed(RouteNames.claimSalon));
+            return _EmptyState(
+              onClaim: () => context.pushNamed(RouteNames.claimSalon),
+              onRegisterNew: () => context.pushNamed(RouteNames.createSalon),
+            );
           }
           return RefreshIndicator(
             color: AppColors.primary,
             onRefresh: () async => ref.invalidate(myOwnedSalonsProvider),
-            child: ListView.builder(
+            child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
-              itemCount: salons.length,
-              itemBuilder: (context, index) => _OwnedSalonCard(salon: salons[index]),
+              children: [
+                ...salons.map((s) => _OwnedSalonCard(salon: s)),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.pushNamed(RouteNames.createSalon),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Add another location'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.accent,
+                    side: const BorderSide(color: AppColors.accent),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    minimumSize: const Size.fromHeight(0),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Additional locations must use the same business name as your existing salon, '
+                  'and you\'ll need to verify it\'s you via an emailed code.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: context.textSecondary, fontSize: 12),
+                ),
+              ],
             ),
           );
         },
@@ -144,9 +167,10 @@ class _OwnedSalonCard extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.onBrowse});
+  const _EmptyState({required this.onClaim, required this.onRegisterNew});
 
-  final VoidCallback onBrowse;
+  final VoidCallback onClaim;
+  final VoidCallback onRegisterNew;
 
   @override
   Widget build(BuildContext context) {
@@ -165,21 +189,36 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              "Find your salon in the app and tap \"Claim it\" on its page to start "
-              "managing its services and bookings.",
+              'Already on Aina via Google Maps? Find and claim it. Brand new? Register it yourself.',
               textAlign: TextAlign.center,
               style: TextStyle(color: context.textSecondary),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: onBrowse,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.secondary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onClaim,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.secondary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text('Find & claim my salon', style: TextStyle(fontWeight: FontWeight.w600)),
               ),
-              child: const Text('Find my salon', style: TextStyle(fontWeight: FontWeight.w600)),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: onRegisterNew,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.accent,
+                  side: const BorderSide(color: AppColors.accent),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text('Register a new salon', style: TextStyle(fontWeight: FontWeight.w600)),
+              ),
             ),
           ],
         ),

@@ -32,4 +32,14 @@ class ProfileRepository {
 
     return Profile.fromJson(response);
   }
+
+  /// A deliberately narrow, single-column update - switching views
+  /// should be fast and shouldn't risk touching name/phone.
+  Future<void> updateActiveView(String view) async {
+    final userId = SupabaseService.currentUser!.id;
+    await SupabaseService.client
+        .from('profiles')
+        .update({'active_view': view})
+        .eq('id', userId);
+  }
 }

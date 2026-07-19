@@ -32,6 +32,37 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     super.dispose();
   }
 
+  /// Defense-in-depth only — the real, non-bypassable checks run
+  /// server-side (see the `validate_profile_row` Postgres trigger and
+  /// Supabase's own GoTrue email/password validation). These just give
+  /// faster feedback and stop obviously-bad input before a network call.
+  String? _validateName(String? value) {
+    final trimmed = value?.trim() ?? '';
+    if (trimmed.isEmpty) return 'Enter your name';
+    if (trimmed.length > 100) return 'Name is too long';
+    if (!RegExp(r"^[a-zA-Z\s.'-]+$").hasMatch(trimmed)) {
+      return 'Name contains invalid characters';
+    }
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    final trimmed = value?.trim() ?? '';
+    if (trimmed.isEmpty) return 'Enter your email';
+    if (trimmed.length > 254) return 'Email is too long';
+    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(trimmed)) {
+      return 'Enter a valid email';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) return 'Enter a password';
+    if (value.length < 8) return 'Password must be at least 8 characters';
+    if (value.length > 128) return 'Password is too long';
+    return null;
+  }
+
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -54,6 +85,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       );
       context.pop();
     } on Exception catch (e) {
+      // Debug-only: the SnackBar below is deliberately generic (see
+      // _friendlyError's doc comment), so this is the only place the
+      // real cause is visible - check the `flutter run` console when
+      // diagnosing a signup failure.
+      assert(() {
+        debugPrint('Signup failed: $e');
+        return true;
+      }());
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -66,15 +105,20 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     }
   }
 
+  /// Deliberately generic for anything that's actually a validation
+  /// failure (bad format, disallowed characters, length, etc.) —
+  /// whether caught client-side or rejected by the server's
+  /// `validate_profile_row` trigger / GoTrue's own checks — so a
+  /// failed request never reveals which specific field or rule
+  /// tripped it. "Already registered" is a distinct account-conflict
+  /// case (the input itself isn't invalid), so it keeps its own
+  /// message, same as most sign-up flows.
   String _friendlyError(Exception e) {
     final message = e.toString();
     if (message.contains('already registered')) {
       return 'An account with this email already exists.';
     }
-    if (message.contains('Password should be')) {
-      return 'Password must be at least 6 characters.';
-    }
-    return 'Something went wrong. Please try again.';
+    return 'We couldn\'t create your account. Please check your details and try again.';
   }
 
   @override
@@ -118,12 +162,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     labelText: 'Full name',
                     prefixIcon: Icon(Icons.person_outline),
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Enter your name';
-                    }
-                    return null;
-                  },
+                  validator: _validateName,
                 ),
                 const SizedBox(height: 16),
 
@@ -135,15 +174,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     labelText: 'Email',
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Enter your email';
-                    }
-                    if (!value.contains('@')) {
-                      return 'Enter a valid email';
-                    }
-                    return null;
-                  },
+                  validator: _validateEmail,
                 ),
                 const SizedBox(height: 16),
 
@@ -165,15 +196,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       },
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Enter a password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
+                  validator: _validatePassword,
                 ),
                 const SizedBox(height: 32),
 
