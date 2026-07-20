@@ -46,6 +46,53 @@ class SalonManagementScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _deleteSalon(BuildContext context, WidgetRef ref) async {
+    final salon = ref.read(salonDetailsProvider(salonId)).valueOrNull;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Close this salon?'),
+        content: Text(
+          'This removes "${salon?.name ?? 'this salon'}" from Aina\'s listings - customers '
+          "won't be able to find or book it anymore, and any pending or confirmed bookings "
+          "will be cancelled. This can't be undone from the app.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Close salon'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref.read(ownerRepositoryProvider).deleteSalon(salonId);
+      ref.invalidate(myOwnedSalonsProvider);
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // back to My Business
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Salon closed and removed from listings.')),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Couldn't close this salon. Please try again."),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final salonAsync = ref.watch(salonDetailsProvider(salonId));
@@ -66,6 +113,11 @@ class SalonManagementScreen extends ConsumerWidget {
               icon: Icon(Icons.edit_outlined, color: context.textSecondary),
               tooltip: 'Edit salon info',
               onPressed: () => _editSalonInfo(context, ref),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+              tooltip: 'Close salon',
+              onPressed: () => _deleteSalon(context, ref),
             ),
           ],
           bottom: const TabBar(

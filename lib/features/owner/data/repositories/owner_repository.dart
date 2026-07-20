@@ -27,6 +27,7 @@ class OwnerRepository {
         .from('salons')
         .select()
         .eq('owner_id', userId)
+        .eq('is_active', true)
         .order('name');
 
     return (response as List)
@@ -203,6 +204,17 @@ class OwnerRepository {
 
   Future<void> deleteService(String serviceId) async {
     await SupabaseService.client.from('services').delete().eq('id', serviceId);
+  }
+
+  /// Closes/removes a salon from listings via the `delete_owner_salon`
+  /// function - a soft delete (is_active = false), not a hard row
+  /// delete, so past bookings and services stay intact for record
+  /// purposes. Any of the salon's pending/confirmed bookings get
+  /// cancelled as part of the same server-side operation. Re-validates
+  /// ownership server-side, so it can't be spoofed by calling the API
+  /// directly with someone else's salon id.
+  Future<void> deleteSalon(String salonId) async {
+    await SupabaseService.client.rpc('delete_owner_salon', params: {'p_salon_id': salonId});
   }
 
   // ---------- Salon info ----------
