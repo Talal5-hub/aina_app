@@ -36,6 +36,37 @@ class AuthRepository {
     return _auth.signInWithPassword(email: email, password: password);
   }
 
+  /// Launches Google's OAuth consent flow in the system browser, then
+  /// redirects back into the app via the same deep link used for email
+  /// confirmation/password reset (`AuthConstants.redirectUrl`) - already
+  /// registered natively on both platforms, so no extra native config
+  /// is needed for this to work.
+  ///
+  /// This returns as soon as the browser is launched, NOT once sign-in
+  /// completes - the actual session arrives asynchronously via
+  /// `SupabaseService.onAuthStateChange`, which RouteGuards already
+  /// listens to for navigation. A first-time Google sign-in creates the
+  /// account automatically; `handle_new_user_profile` still fires, just
+  /// with no `role` in metadata (OAuth doesn't let us inject that ahead
+  /// of time) - it defaults to 'customer', same as the DB column
+  /// default. That's fine under the "one account, two hats" model:
+  /// they can claim/register a salon and switch to Business view
+  /// whenever they like, exactly like an email/password customer can.
+  Future<void> signInWithGoogle() {
+    return _auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: AuthConstants.redirectUrl,
+    );
+  }
+
+  /// Same as [signInWithGoogle], via GitHub instead.
+  Future<void> signInWithGitHub() {
+    return _auth.signInWithOAuth(
+      OAuthProvider.github,
+      redirectTo: AuthConstants.redirectUrl,
+    );
+  }
+
   Future<void> signOut() {
     return _auth.signOut();
   }
@@ -48,6 +79,19 @@ class AuthRepository {
     return _auth.resetPasswordForEmail(
       email,
       redirectTo: AuthConstants.redirectUrl,
+    );
+  }
+
+  /// Resends the signup confirmation email. Used by the login screen's
+  /// "Resend confirmation email" fallback, offered generically after
+  /// repeated failed attempts (not conditioned on whether the account
+  /// is actually unconfirmed) so its mere presence doesn't leak
+  /// anything about a specific email - see LoginScreen.
+  Future<void> resendConfirmationEmail(String email) {
+    return _auth.resend(
+      type: OtpType.signup,
+      email: email,
+      emailRedirectTo: AuthConstants.redirectUrl,
     );
   }
 
