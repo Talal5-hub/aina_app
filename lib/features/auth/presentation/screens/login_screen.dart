@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aina/core/routing/route_names.dart';
 import 'package:aina/core/theme/app_colors.dart';
@@ -362,7 +363,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       height: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                        : const _GoogleMonogram(),
+                        : const FaIcon(FontAwesomeIcons.google, size: 18, color: Color(0xFF4285F4)),
                     label: Text(
                       _isGoogleLoading ? 'Signing in…' : 'Continue with Google',
                       style: TextStyle(color: context.textPrimary, fontWeight: FontWeight.w500),
@@ -386,7 +387,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       height: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                        : Icon(Icons.code, color: context.textPrimary, size: 20),
+                        : FaIcon(FontAwesomeIcons.github, size: 18, color: context.textPrimary),
                     label: Text(
                       _isGitHubLoading ? 'Signing in…' : 'Continue with GitHub',
                       style: TextStyle(color: context.textPrimary, fontWeight: FontWeight.w500),
@@ -421,36 +422,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// A simple "G" monogram for the Google button - avoids pulling in an
-/// icon-pack dependency just for one brand mark. Not pixel-identical
-/// to Google's official multi-color logo, but reads clearly at button
-/// size and needs no new package.
-class _GoogleMonogram extends StatelessWidget {
-  const _GoogleMonogram();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 20,
-      height: 20,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFF4285F4), width: 1.5),
-      ),
-      child: const Text(
-        'G',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF4285F4),
-          height: 1,
         ),
       ),
     );
