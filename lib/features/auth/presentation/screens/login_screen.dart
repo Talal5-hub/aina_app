@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:aina/core/constants/asset_paths.dart';
 import 'package:aina/core/routing/route_names.dart';
 import 'package:aina/core/theme/app_colors.dart';
 import 'package:aina/core/theme/theme_extensions.dart';
@@ -82,9 +84,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       await ref.read(authRepositoryProvider).signIn(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
       // Navigation on success is handled by RouteGuards reacting to the
       // auth state change — no explicit context.go(...) needed here.
     } on Exception catch (e) {
@@ -218,16 +220,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   'Welcome back',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: context.textPrimary,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: context.textPrimary,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Sign in to continue',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: context.textSecondary,
-                  ),
+                        color: context.textSecondary,
+                      ),
                 ),
                 const SizedBox(height: 40),
 
@@ -286,7 +288,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       children: [
                         Text(
                           "Still having trouble? If you recently signed up, you may need to "
-                              'confirm your email first.',
+                          'confirm your email first.',
                           style: TextStyle(color: context.textSecondary, fontSize: 12.5),
                         ),
                         Align(
@@ -296,10 +298,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             style: TextButton.styleFrom(padding: EdgeInsets.zero),
                             child: _isResending
                                 ? const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
                                 : const Text('Resend confirmation email'),
                           ),
                         ),
@@ -325,17 +327,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     child: _isLoading
                         ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.4,
-                        color: AppColors.secondary,
-                      ),
-                    )
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.4,
+                              color: AppColors.secondary,
+                            ),
+                          )
                         : const Text(
-                      'Sign In',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
+                            'Sign In',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -359,11 +361,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
                     icon: _isGoogleLoading
                         ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                        : const FaIcon(FontAwesomeIcons.google, size: 18, color: Color(0xFF4285F4)),
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : SvgPicture.asset(AssetPaths.googleLogo, width: 18, height: 18),
                     label: Text(
                       _isGoogleLoading ? 'Signing in…' : 'Continue with Google',
                       style: TextStyle(color: context.textPrimary, fontWeight: FontWeight.w500),
@@ -383,10 +385,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onPressed: _isGitHubLoading ? null : _handleGitHubSignIn,
                     icon: _isGitHubLoading
                         ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
                         : FaIcon(FontAwesomeIcons.github, size: 18, color: context.textPrimary),
                     label: Text(
                       _isGitHubLoading ? 'Signing in…' : 'Continue with GitHub',
@@ -427,3 +429,4 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 }
+

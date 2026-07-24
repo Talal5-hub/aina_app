@@ -12,6 +12,11 @@ class AssetPaths {
   static const String logoWordmark = '$_iconsBase/aina_logo_wordmark.svg';
   static const String appIconPng = '$_imagesBase/app_icon.png';
 
+  // Third-party brand marks (official 4-color Google "G" - GitHub's
+  // mark is single-color, so it uses a FontAwesome glyph instead of a
+  // bundled asset; see login_screen.dart)
+  static const String googleLogo = '$_imagesBase/google_logo.svg';
+
   // Onboarding / empty states
   static const String onboardingDiscover = '$_imagesBase/onboarding_discover.svg';
   static const String onboardingBook = '$_imagesBase/onboarding_book.svg';
